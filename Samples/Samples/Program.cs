@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -8,7 +9,7 @@ namespace Samples
     {
         public static void Main()
         {
-            Test8();
+            Test9();
 
             Console.WriteLine("Main program done.");
             Console.ReadKey();
@@ -265,6 +266,39 @@ namespace Samples
                 default:
                     return false;
             }
+        }
+
+        #endregion
+
+        #region Manage critical section
+
+        private static void Test9()
+        {
+            var ba = new BankAccount();
+            var tasks = new List<Task>();
+
+            for (int i = 0; i < 10; i++)
+            {
+                tasks.Add(Task.Factory.StartNew(() =>
+                {
+                    for (int x = 0; x < 1000; x++)
+                    {
+                        ba.Deposit(100);
+                    }
+                }));
+                
+                tasks.Add(Task.Factory.StartNew(() =>
+                {
+                    for (int x = 0; x < 1000; x++)
+                    {
+                        ba.Withdraw(100);
+                    }
+                }));
+            }
+
+            Task.WaitAll(tasks.ToArray());
+            
+            Console.WriteLine($"The balance is: {ba.Balance}");
         }
 
         #endregion
